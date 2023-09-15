@@ -1,0 +1,18 @@
+{
+  "name": "common",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc --build",
+    "lint": "eslint --fix --ext js,ts,tsx ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.6.1",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": "^20",
+    "npm": ">= 6.13.4",
+    "pnpm": ">=3",
+    "yarn": ">= 1.21.1"
+  }
+}

@@ -1,0 +1,10 @@
+.idea
+*.cache
+.env
+
+node_modules
+**/dist
+*.tsbuildinfo
+
+coverage
+junit.xml

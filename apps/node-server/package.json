@@ -1,0 +1,25 @@
+{
+  "name": "node-server",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "tsc && node dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "common": "workspace:^",
+    "uuid": "^9.0.0",
+    "ws": "^8.14.1"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.3",
+    "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.6.0",
+    "@typescript-eslint/parser": "^6.6.0",
+    "eslint": "^8.49.0",
+    "typescript": "^5.2.2"
+  }
+}
