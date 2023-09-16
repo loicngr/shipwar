@@ -1,13 +1,13 @@
 import { LoaderInterface } from '../type/loader'
 
 export class Loader implements LoaderInterface {
-  private readonly images: Record<string, HTMLImageElement | unknown>
+  readonly images: Record<string, HTMLImageElement | unknown>
 
   constructor () {
     this.images = {}
   }
 
-  public getImage (key: string): HTMLImageElement {
+  getImage (key: string): HTMLImageElement {
     const image = this.images[key] ?? undefined
 
     if (image == null) {
@@ -17,7 +17,7 @@ export class Loader implements LoaderInterface {
     return image as HTMLImageElement
   }
 
-  public async loadImage (key: string, src: string): Promise<HTMLImageElement | string> {
+  async loadImage (key: string, src: string): Promise<HTMLImageElement | string> {
     const image = new Image()
 
     const loader = new Promise<HTMLImageElement | string>((resolve, reject) => {

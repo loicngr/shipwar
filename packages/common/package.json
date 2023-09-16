@@ -14,5 +14,8 @@
     "npm": ">= 6.13.4",
     "pnpm": ">=3",
     "yarn": ">= 1.21.1"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.2"
   }
 }

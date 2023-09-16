@@ -10,9 +10,9 @@
     "build": "quasar build"
   },
   "dependencies": {
+    "common": "workspace:^",
     "@quasar/extras": "^1.16.6",
     "axios": "^1.5.0",
-    "common": "workspace:^",
     "lodash": "^4.17.21",
     "minimist": "^1.2.8",
     "pinia": "^2.1.6",

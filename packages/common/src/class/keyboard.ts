@@ -5,44 +5,44 @@ import {
 } from '../type/keyboard'
 
 export class Keyboard implements KeyboardInterface {
-  private readonly keys: Record<string, boolean>
-  private readonly keysEvents: Record<string, MouseEvent | PointerEvent | WheelEvent>
+  readonly keys: Record<string, boolean>
+  readonly keysEvents: Record<string, MouseEvent | PointerEvent | WheelEvent>
 
   constructor () {
     this.keys = {}
     this.keysEvents = {}
   }
 
-  public listenForWheelEvents (keys: WheelKeyEnum[]): void {
+  listenForWheelEvents (keys: WheelKeyEnum[]): void {
     keys.forEach((k) => {
       this.keys[k] = false
       window.addEventListener(k, this[WheelKeyBindingEnum[k]].bind(this))
     })
   }
 
-  public listenForMouseEvents (keys: MouseKeyEnum[]): void {
+  listenForMouseEvents (keys: MouseKeyEnum[]): void {
     keys.forEach((k) => {
       this.keys[k] = false
       window.addEventListener(k, this[MouseKeyBindingEnum[k]].bind(this))
     })
   }
 
-  public listenForEvents (keys: string[]): void {
+  listenForEvents (keys: string[]): void {
     window.addEventListener('keydown', this.onKeyDown.bind(this))
     window.addEventListener('keyup', this.onKeyUp.bind(this))
 
     keys.forEach((k) => (this.keys[k] = false))
   }
 
-  public isPressed (key: string): boolean {
+  isPressed (key: string): boolean {
     return key in this.keys && this.keys[key]
   }
 
-  public resetKey (key: string): void {
+  resetKey (key: string): void {
     this.keys[key] = false
   }
 
-  private [WheelKeyBindingEnum.wheel] (event: WheelEvent): void {
+  [WheelKeyBindingEnum.wheel] (event: WheelEvent): void {
     const type = event.type
 
     if (type in this.keys) {
@@ -51,7 +51,7 @@ export class Keyboard implements KeyboardInterface {
     }
   }
 
-  private [MouseKeyBindingEnum.mousedown] (event: MouseEvent): void {
+  [MouseKeyBindingEnum.mousedown] (event: MouseEvent): void {
     const type = event.type
 
     if (type in this.keys) {
@@ -61,7 +61,7 @@ export class Keyboard implements KeyboardInterface {
     }
   }
 
-  private [MouseKeyBindingEnum.mouseup] (event: MouseEvent): void {
+  [MouseKeyBindingEnum.mouseup] (event: MouseEvent): void {
     const type = 'mousedown'
 
     if (type in this.keys) {
@@ -70,7 +70,7 @@ export class Keyboard implements KeyboardInterface {
     }
   }
 
-  private [MouseKeyBindingEnum.click] (event: MouseEvent): void {
+  [MouseKeyBindingEnum.click] (event: MouseEvent): void {
     const type = event.type
 
     if (type in this.keys) {
@@ -79,7 +79,7 @@ export class Keyboard implements KeyboardInterface {
     }
   }
 
-  private onKeyDown (event: KeyboardEvent) {
+  onKeyDown (event: KeyboardEvent) {
     const code = event.code
 
     if (code in this.keys) {
@@ -88,7 +88,7 @@ export class Keyboard implements KeyboardInterface {
     }
   }
 
-  private onKeyUp (event: KeyboardEvent) {
+  onKeyUp (event: KeyboardEvent) {
     const code = event.code
 
     if (code in this.keys) {

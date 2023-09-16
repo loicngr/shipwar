@@ -1,14 +1,20 @@
-import { GameInterface } from './game'
+import { Socket } from 'socket.io-client'
+import { Game } from '../class/game'
+
+export interface ServerSendEventInterface {
+  key: string
+  payload: string | Record<string, unknown>
+}
 
 export interface ServerInterface {
-  webSocketSettings: { url: string, protocols: string[] }
-  webSocket: WebSocket | undefined
-  readonly game: GameInterface
+  webSocketSettings: { url: string }
+  webSocket: Socket | undefined
+  readonly game: Game
 
   init: () => void
   tryConnection: () => void
   onOpen: () => void
   onReceived: (event: MessageEvent) => void
-  send: (payload: Record<string, unknown>) => void
+  send: (payload: ServerSendEventInterface) => void
   get isOk(): boolean
 }

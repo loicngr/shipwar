@@ -1,124 +1,59 @@
-import { ServerInterface } from '../type/server'
-import { Player } from './player'
-import { Vector } from './vector'
+import { ServerInterface, ServerSendEventInterface } from '../type/server'
 import { Game } from './game'
-import { Bullet } from './bullet'
+import { io, Socket } from 'socket.io-client'
 
 export class Server implements ServerInterface {
-  private readonly webSocketSettings: { url: string, protocols: string[] }
-  private webSocket: WebSocket | undefined
+  readonly webSocketSettings: { url: string }
+  webSocket: Socket | undefined
+  readonly game: Game
 
   constructor (
-    private readonly game: Game,
+    game: Game,
   ) {
+    this.game = game
     this.webSocketSettings = {
-      url: `ws://${window.location.hostname}:8080`,
-      protocols: [],
+      url: `ws://${window.location.hostname}:8000`,
     }
 
     this.tryConnection()
     this.init()
   }
 
-  private init () {
+  init () {
     const ws = this.webSocket
     if (typeof ws === 'undefined') {
       return
     }
 
-    ws.onopen = this.onOpen.bind(this)
-    ws.onmessage = (data: MessageEvent<unknown>) => { this.onReceived(data) }
+    ws.on('connect', this.onOpen)
+
+    ws.onAny(this.onReceived)
   }
 
-  private tryConnection () {
-    this.webSocket = new WebSocket(
-      this.webSocketSettings.url,
-      this.webSocketSettings.protocols,
-    )
+  tryConnection () {
+    this.webSocket = io(this.webSocketSettings.url, {
+      transports: ['websocket'],
+    })
   }
 
-  private onOpen () {
+  onOpen () {
     console.log('Connected to server')
   }
 
-  private onReceived (event: MessageEvent): void {
-    const payload = JSON.parse(event.data) as {
-      key: string
-      subject: Record<string, unknown> | Array<Record<string, unknown>>
-    }
-
-    switch (payload.key) {
-      case 'players': {
-        const payloadPlayers = payload.subject as Array<{
-          id: string
-          name: string
-          position: { x: number, y: number }
-        }>
-
-        const players = new Map()
-
-        payloadPlayers.forEach((player) => {
-          if (typeof player.position !== 'undefined') {
-            players.set(player.id, new Player(
-              player.id,
-              player.name,
-              new Vector(player.position.x, player.position.y),
-            ))
-          }
-        })
-
-        this.game.setPlayers(players)
-
-        break
-      }
-      case 'newPlayer': {
-        if (
-          typeof payload.subject.id === 'string' &&
-          this.game.player?.id !== payload.subject.id
-        ) {
-          console.log('define %s as current player', payload.subject.name)
-
-          this.game.player = new Player(
-            payload.subject.id as string,
-            payload.subject.name as string,
-          )
-
-          this.game.addPlayer(this.game.player)
-        }
-        break
-      }
-      case 'bullet': {
-        const bullet = payload.subject as unknown as Bullet
-        const bulletPlayer = this.game.getPlayerById(bullet.player.id)
-        if (typeof bulletPlayer === 'undefined') {
-          break
-        }
-
-        this.game.addBullet(new Bullet(
-          bulletPlayer,
-          new Vector(bullet.from.x, bullet.from.y),
-          new Vector(bullet.to.x, bullet.to.y),
-        ))
-        break
-      }
-      default:
-        break
-    }
+  onReceived (event: MessageEvent): void {
+    console.log(event)
   }
 
-  public send (payload: Record<string, unknown>): void {
+  send (event: ServerSendEventInterface): void {
     const ws = this.webSocket
-    if (
-      typeof ws === 'undefined' ||
-      !this.isOk
-    ) {
+    if (typeof ws === 'undefined' || !this.isOk) {
       return
     }
 
-    ws.send(JSON.stringify(payload))
+    ws.emit(event.key, typeof event.payload === 'string' ? event.payload : JSON.stringify(event.payload))
   }
 
-  public get isOk (): boolean {
-    return typeof this.webSocket !== 'undefined' && this.webSocket.readyState === this.webSocket.OPEN
+  get isOk (): boolean {
+    return typeof this.webSocket !== 'undefined' && this.webSocket.active
   }
 }

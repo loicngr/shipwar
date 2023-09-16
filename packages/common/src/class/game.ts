@@ -14,17 +14,17 @@ import {
 import { DirectionEnum } from '../type/direction'
 
 export class Game implements GameInterface {
-  public domRef: HTMLElement
-  public readonly widthSize: number
-  public readonly heightSize: number
-  private readonly canvas: Canvas
-  private readonly loader: Loader
-  private previousElapsed: number
-  private players: Map<string, Player>
-  public player: Player | undefined
-  public keyboard: Keyboard
-  private readonly server: Server
-  private readonly bullets: Bullet[]
+  domRef: HTMLElement
+  readonly widthSize: number
+  readonly heightSize: number
+  readonly canvas: Canvas
+  readonly loader: Loader
+  previousElapsed: number
+  players: Map<string, Player>
+  player: Player | undefined
+  keyboard: Keyboard
+  readonly server: Server
+  readonly bullets: Bullet[]
 
   constructor (ref: string) {
     const domRef = document.getElementById(ref)
@@ -49,7 +49,7 @@ export class Game implements GameInterface {
     this.run()
   }
 
-  public run (): void {
+  run (): void {
     void Promise.all(this.load())
       .then(() => {
         this.init()
@@ -57,13 +57,13 @@ export class Game implements GameInterface {
       })
   }
 
-  private load (): Array<Promise<HTMLImageElement | string>> {
+  load (): Array<Promise<HTMLImageElement | string>> {
     return [
       this.loader.loadImage('tilesheet', './assets/kenney_tiny-battle/Tilemap/tilemap.png'),
     ]
   }
 
-  private init () {
+  init () {
     // Init components
     const keysValues = Object.values(KeyEnum)
     this.keyboard.listenForEvents(keysValues)
@@ -77,7 +77,7 @@ export class Game implements GameInterface {
 
     this.server.send({
       key: 'newPlayer',
-      subject: {
+      payload: {
         position: {
           x: player.position?.x,
           y: player.position?.y,
@@ -86,7 +86,7 @@ export class Game implements GameInterface {
     })
   }
 
-  private update (
+  update (
     delta: number,
   ): void {
     // Update components
@@ -101,7 +101,7 @@ export class Game implements GameInterface {
 
       this.server.send({
         key: 'newBullet',
-        subject: {
+        payload: {
           player: {
             id: this.player.id,
           },
@@ -117,7 +117,7 @@ export class Game implements GameInterface {
     if (hasMovement) {
       this.server.send({
         key: 'updatePlayerPosition',
-        subject: {
+        payload: {
           x: this.player.position?.x,
           y: this.player.position?.y,
         },
@@ -125,14 +125,14 @@ export class Game implements GameInterface {
     }
   }
 
-  private render (): void {
+  render (): void {
     this.renderMap()
     this.renderPlayers()
     this.renderBullets()
     this.renderUtils()
   }
 
-  private renderMap (): void {
+  renderMap (): void {
     // Draw map layer
     const tiles = this.loader.getImage('tilesheet')
 
@@ -153,7 +153,7 @@ export class Game implements GameInterface {
     }
   }
 
-  private renderPlayers (): void {
+  renderPlayers (): void {
     // Draw players layer
     const tiles = this.loader.getImage('tilesheet')
     const players = new Map(this.players)
@@ -180,7 +180,7 @@ export class Game implements GameInterface {
     })
   }
 
-  private renderBullets (): void {
+  renderBullets (): void {
     // Draw bullets layer
     const bullets = this.bullets
 
@@ -195,7 +195,7 @@ export class Game implements GameInterface {
     })
   }
 
-  private renderUtils (): void {
+  renderUtils (): void {
     this.canvas.context.fillText(
       this.server.isOk
         ? 'Server : OK'
@@ -205,7 +205,7 @@ export class Game implements GameInterface {
     )
   }
 
-  private tick (elapsed: number): void {
+  tick (elapsed: number): void {
     requestAnimationFrame(this.tick.bind(this))
 
     this.canvas.context.clearRect(0, 0, this.widthSize, this.heightSize)
@@ -217,19 +217,19 @@ export class Game implements GameInterface {
     this.render()
   }
 
-  public setPlayers (players: Map<string, Player>): void {
+  setPlayers (players: Map<string, Player>): void {
     this.players = new Map(players)
   }
 
-  public getPlayerById (id: string): Player | undefined {
+  getPlayerById (id: string): Player | undefined {
     return this.players.get(id)
   }
 
-  public addBullet (bullet: Bullet) {
+  addBullet (bullet: Bullet) {
     this.bullets.push(bullet)
   }
 
-  public addPlayer (player: Player) {
+  addPlayer (player: Player) {
     if (typeof player.id === 'undefined') {
       return
     }

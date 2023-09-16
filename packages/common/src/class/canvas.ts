@@ -3,10 +3,10 @@ import { TILE_SIZE } from '../const/tile'
 import { Game } from './game'
 
 export class Canvas implements CanvasInterface {
-  private _domRef: HTMLCanvasElement | undefined
+  _domRef: HTMLCanvasElement | undefined
 
   constructor (
-    private readonly game: Game,
+    readonly game: Game,
     public identifier: string,
   ) {
     this.createDomElement()
@@ -34,7 +34,7 @@ export class Canvas implements CanvasInterface {
     return ctx
   }
 
-  private createDomElement () {
+  createDomElement () {
     if (document.getElementById(this.identifier) !== null) {
       throw new Error('Canvas element is already created !')
     }
@@ -51,7 +51,7 @@ export class Canvas implements CanvasInterface {
     this.game.domRef.appendChild(this.domRef)
   }
 
-  private initContext () {
+  initContext () {
     this.context.font = `${(7).toString()}px sans-serif`
   }
 }
