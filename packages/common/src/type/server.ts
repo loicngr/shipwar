@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client'
-import { Game } from '../class/game'
+import { type Game } from '../class/game'
 
 export interface ServerSendEventInterface {
   key: string
@@ -14,7 +14,7 @@ export interface ServerInterface {
   init: () => void
   tryConnection: () => void
   onOpen: () => void
-  onReceived: (event: MessageEvent) => void
+  onReceived: (event: string, payload: unknown) => void
   send: (payload: ServerSendEventInterface) => void
   get isOk(): boolean
 }
