@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.build.json",
+
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "ES2019",
+    "lib": [
+      "esnext",
+      "dom"
+    ]
+  },
+
+  "include": [
+    "src/**/*"
+  ]
+}

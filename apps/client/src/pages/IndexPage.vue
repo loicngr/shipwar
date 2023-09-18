@@ -8,7 +8,7 @@
 </template>
 
 <script setup lang="ts">
-import { Game } from 'common/src/class/game'
+import { Game } from '@shipwar/common/src/class/game'
 import { onMounted } from 'vue'
 
 onMounted(() => {

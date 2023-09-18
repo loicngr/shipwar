@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "common": "workspace:^",
+    "@shipwar/common": "workspace:*",
     "uuid": "^9.0.0",
     "ws": "^8.14.1"
   },

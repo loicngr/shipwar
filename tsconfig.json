@@ -3,5 +3,10 @@
 
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "@shipwar/common/*": ["packages/common/src/*"],
+      "@shipwar/*": ["packages/*/src"]
+    },
+    "noEmit": true
   }
 }

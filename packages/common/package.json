@@ -1,16 +1,17 @@
 {
-  "name": "common",
+  "name": "@shipwar/common",
   "version": "1.0.0",
+  "main": "./dist/index",
+  "types": "dist/index",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc --build",
+    "build": "pnpm run clean && pnpm run compile",
+    "clean": "rm -rf ./dist",
+    "compile": "tsc -p tsconfig.build.json",
+    "prepublishOnly": "pnpm run build",
     "lint": "eslint --fix --ext js,ts,tsx ."
-  },
-  "main": "./dist/index.js",
-  "exports": {
-    "types": "./dist/index.d.ts",
-    "import": "./dist/index.js",
-    "require": "./dist/index.js",
-    "node": "./dist/index.js"
   },
   "devDependencies": {
     "@types/node": "^20.6.1",

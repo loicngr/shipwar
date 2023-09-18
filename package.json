@@ -2,15 +2,21 @@
   "name": "shipwar",
   "version": "1.0.0",
   "description": "",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
   "license": "proprietary",
   "author": "loicngr <pro.nogierloic@gmail.com>",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clean": "pnpm run -r clean"
   },
   "keywords": [],
   "devDependencies": {
     "@types/node": "^18.15.11",
     "@typescript-eslint/eslint-plugin": "^5.10.0",
+    "eslint-plugin-import": "~2.28.1",
     "@typescript-eslint/parser": "^5.10.0",
     "eslint-config-standard-with-typescript": "^34.0.1",
     "typescript": "^5.2.2"
