@@ -5,6 +5,13 @@
     "build": "tsc --build",
     "lint": "eslint --fix --ext js,ts,tsx ."
   },
+  "main": "./dist/index.js",
+  "exports": {
+    "types": "./dist/index.d.ts",
+    "import": "./dist/index.js",
+    "require": "./dist/index.js",
+    "node": "./dist/index.js"
+  },
   "devDependencies": {
     "@types/node": "^20.6.1",
     "typescript": "^5.2.2"

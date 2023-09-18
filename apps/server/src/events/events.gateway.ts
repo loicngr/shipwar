@@ -1,7 +1,7 @@
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets'
 import { type Server, Socket } from 'socket.io'
 import { type Vector } from 'common/src/class/vector'
-import { Player } from 'common/src/class/player'
+import { Player } from 'common'
 
 @WebSocketGateway(8000, {
   transports: ['websocket'],
