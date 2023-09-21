@@ -4,6 +4,7 @@ import { Keyboard } from '../class/keyboard'
 import { Loader } from '../class/loader'
 import { Canvas } from '../class/canvas'
 import { Bullet } from '../class/bullet'
+import { PrepareBullet } from '../class/prepareBullet'
 
 export interface GameInterface {
   domRef: HTMLElement
@@ -13,10 +14,11 @@ export interface GameInterface {
   loader: Loader
   previousElapsed: number
   players: Map<string, Player>
-  player: Player | undefined
+  player: string | undefined
   keyboard: Keyboard
   server: Server
   bullets: Bullet[]
+  prepareBullet: PrepareBullet | undefined
 
   run: () => void
 

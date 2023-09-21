@@ -11,7 +11,7 @@ import { Server } from './server'
 import {
   KeyEnum, MouseKeyEnum, WheelKeyEnum,
 } from '../type/keyboard'
-import { DirectionEnum } from '../type/direction'
+import { PrepareBullet } from './prepareBullet'
 
 export class Game implements GameInterface {
   domRef: HTMLElement
@@ -21,10 +21,11 @@ export class Game implements GameInterface {
   readonly loader: Loader
   previousElapsed: number
   players: Map<string, Player>
-  player: Player | undefined
+  player: string | undefined
   keyboard: Keyboard
   readonly server: Server
   readonly bullets: Bullet[]
+  prepareBullet: PrepareBullet | undefined
 
   constructor (ref: string) {
     const domRef = document.getElementById(ref)
@@ -86,40 +87,72 @@ export class Game implements GameInterface {
     })
   }
 
+  getPlayerOrThrow (): Player {
+    if (typeof this.player !== 'string') {
+      throw new Error('no player')
+    }
+
+    const player = this.players.get(this.player)
+
+    if (typeof player === 'undefined') {
+      throw new Error('no player')
+    }
+
+    return player
+  }
+
   update (
     delta: number,
   ): void {
     // Update components
-    if (typeof this.player === 'undefined') {
+    let player
+
+    try {
+      player = this.getPlayerOrThrow()
+    } catch (e) {
       return
     }
 
-    const hasMovement = this.player.handleMovement(this, delta)
+    const hasMovement = player.handleMovement(this, delta)
 
-    if (this.keyboard.isPressed(KeyEnum.E)) {
-      this.keyboard.resetKey(KeyEnum.E)
+    if (this.keyboard.isPressed(KeyEnum.F)) {
+      this.keyboard.resetKey(KeyEnum.F)
 
-      this.server.send({
-        key: 'newBullet',
-        payload: {
-          player: {
-            id: this.player.id,
+      if (typeof this.prepareBullet === 'undefined') {
+        this.prepareBullet = new PrepareBullet(player.id, player.position)
+        this.prepareBullet.start()
+      } else {
+        this.prepareBullet.stop()
+        const bullet = this.prepareBullet
+        this.prepareBullet = undefined
+
+        this.server.send({
+          key: 'newBullet',
+          payload: {
+            player: {
+              id: player.id,
+            },
+            to: {
+              x: bullet.to.x,
+              y: bullet.to.y,
+            },
+            from: {
+              x: bullet.from.x,
+              y: bullet.from.y,
+            },
           },
-          position: {
-            x: this.player.position?.x,
-            y: this.player.position?.y,
-          },
-          direction: DirectionEnum.Down.toString(),
-        },
-      })
+        })
+      }
     }
 
     if (hasMovement) {
       this.server.send({
         key: 'updatePlayerPosition',
         payload: {
-          x: this.player.position?.x,
-          y: this.player.position?.y,
+          position: {
+            x: player.position?.x,
+            y: player.position?.y,
+          },
         },
       })
     }
@@ -128,6 +161,7 @@ export class Game implements GameInterface {
   render (): void {
     this.renderMap()
     this.renderPlayers()
+    this.renderPreparedBullet()
     this.renderBullets()
     this.renderUtils()
   }
@@ -186,13 +220,26 @@ export class Game implements GameInterface {
 
     bullets.forEach((bullet: Bullet) => {
       this.canvas.context.beginPath()
-      this.canvas.context.lineWidth = 10
+      this.canvas.context.lineWidth = 5
       this.canvas.context.moveTo(bullet.from.x, bullet.from.y)
       this.canvas.context.lineTo(bullet.to.x, bullet.to.y)
       this.canvas.context.stroke()
-
-      // this.bullets.splice(index, 1)
     })
+  }
+
+  renderPreparedBullet (): void {
+    // Draw bullets layer
+    const bullet = this.prepareBullet
+
+    if (typeof bullet === 'undefined') {
+      return
+    }
+
+    this.canvas.context.beginPath()
+    this.canvas.context.lineWidth = 5
+    this.canvas.context.moveTo(bullet.from.x, bullet.from.y)
+    this.canvas.context.lineTo(bullet.to.x, bullet.to.y)
+    this.canvas.context.stroke()
   }
 
   renderUtils (): void {

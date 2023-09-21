@@ -9,9 +9,16 @@ export * from './class/vector'
 export * from './class/loader'
 export * from './class/game'
 export * from './class/bullet'
+export * from './class/prepareBullet'
 
 /**
  * Constants
  */
 
 export * from './const/event'
+
+/**
+ * Types
+ */
+
+export * from './type/event'

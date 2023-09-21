@@ -8,10 +8,13 @@ import {
 } from '@nestjs/websockets'
 import { type Server, Socket } from 'socket.io'
 import {
-  Player,
-  type Vector,
   EVENT_KEY_NEW_PLAYER,
+  EVENT_KEY_UPDATE_PLAYER_POSITION,
+  EVENT_KEY_NEW_BULLET,
   EVENT_KEY_PLAYERS,
+  Player,
+  NewBullet,
+  type Vector,
 } from '@shipwar/common'
 
 @WebSocketGateway(8000, {
@@ -22,35 +25,64 @@ import {
 })
 export class EventsGateway implements OnGatewayDisconnect {
   @WebSocketServer()
-    server: Server | undefined
+  server: Server | undefined
 
-  players: Player[]
+  players: Map<string, Player>
 
-  constructor () {
-    this.players = []
+  constructor() {
+    this.players = new Map()
   }
 
-  handleDisconnect (client: Socket) {
-    const i = this.players.findIndex((player) => player.id === client.id)
+  serverSend(key: string, payload: unknown) {
+    this.server?.emit(key, payload)
+  }
 
-    if (i !== -1) {
-      this.players.splice(i, 1)
+  sendPlayers() {
+    this.serverSend(EVENT_KEY_PLAYERS, Array.from(this.players.values()))
+  }
+
+  handleDisconnect(client: Socket) {
+    this.players.delete(client.id)
+    this.sendPlayers()
+  }
+
+  @SubscribeMessage(EVENT_KEY_UPDATE_PLAYER_POSITION)
+  async [EVENT_KEY_UPDATE_PLAYER_POSITION](
+    @ConnectedSocket() client: Socket,
+    @MessageBody('position') position: Vector,
+  ) {
+    const player = this.players.get(client.id)
+
+    if (typeof player === 'undefined') {
+      return
     }
 
-    this.server?.emit(EVENT_KEY_PLAYERS, this.players)
+    player.position.x = position.x
+    player.position.y = position.y
+
+    this.sendPlayers()
+  }
+
+  @SubscribeMessage(EVENT_KEY_NEW_BULLET)
+  async [EVENT_KEY_NEW_BULLET](
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: NewBullet,
+  ) {
+    this.serverSend(EVENT_KEY_NEW_BULLET, {
+      ...payload,
+    })
   }
 
   @SubscribeMessage(EVENT_KEY_NEW_PLAYER)
-  async [EVENT_KEY_NEW_PLAYER] (
-  @ConnectedSocket() client: Socket,
-    @MessageBody() payload: { position: Vector },
+  async [EVENT_KEY_NEW_PLAYER](
+    @ConnectedSocket() client: Socket,
+    @MessageBody('position') position: Vector,
   ) {
-    const newPlayer = new Player(client.id, client.id.slice(0, 4), payload.position)
-    this.players.push(newPlayer)
+    const newPlayer = new Player(client.id, client.id.slice(0, 4), position)
+
+    this.players.set(newPlayer.id, newPlayer)
 
     client.emit(EVENT_KEY_NEW_PLAYER, newPlayer)
-    this.server?.emit(EVENT_KEY_PLAYERS, this.players)
-
-    return newPlayer
+    this.sendPlayers()
   }
 }

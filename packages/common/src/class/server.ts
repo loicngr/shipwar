@@ -2,9 +2,11 @@ import type { ServerInterface, ServerSendEventInterface } from '../type/server'
 import { type NewPlayerInterface } from '../type/player'
 import { Game } from './game'
 import { io, Socket } from 'socket.io-client'
-import { EVENT_KEY_NEW_PLAYER, EVENT_KEY_PLAYERS } from '../const/event'
+import { EVENT_KEY_NEW_BULLET, EVENT_KEY_NEW_PLAYER, EVENT_KEY_PLAYERS } from '../const/event'
 import { Player } from './player'
 import { Vector } from './vector'
+import { NewBullet } from '../type/event'
+import { Bullet } from './bullet'
 
 export class Server implements ServerInterface {
   readonly webSocketSettings: { url: string }
@@ -56,18 +58,37 @@ export class Server implements ServerInterface {
     if (event === EVENT_KEY_PLAYERS) {
       this.onPlayers(payload as Array<Required<Player>>)
     }
+
+    if (event === EVENT_KEY_NEW_BULLET) {
+      this.onNewBullet(payload as NewBullet)
+    }
+  }
+
+  onNewBullet (payload: NewBullet): void {
+    const bulletPlayer = this.game.players.get(payload.player.id)
+    if (typeof bulletPlayer === 'undefined') {
+      return
+    }
+
+    this.game.addBullet(new Bullet(
+      bulletPlayer,
+      new Vector(payload.from.x, payload.from.y),
+      new Vector(payload.to.x, payload.to.y),
+    ))
   }
 
   onPlayers (payload: Array<Required<Player>>) {
     const players = new Map()
 
     payload.forEach((player) => {
-      players.set(player.id, new Player(
-        player.id,
-        player.name,
-        new Vector(player.position.x, player.position.y),
-        player.direction,
-      ))
+      if (typeof player.position !== 'undefined') {
+        players.set(player.id, new Player(
+          player.id,
+          player.name,
+          new Vector(player.position.x, player.position.y),
+          player.direction,
+        ))
+      }
     })
 
     this.game.setPlayers(players)
@@ -76,19 +97,22 @@ export class Server implements ServerInterface {
   onNewPlayer (payload: NewPlayerInterface) {
     if (
       typeof payload.id === 'undefined' ||
-      (typeof this.game.player !== 'undefined' && this.game.player.id === payload.id)
+      (typeof this.game.player === 'string' && this.game.player === payload.id)
     ) {
       return
     }
+
     console.log('define %s as current player', payload.name)
 
-    this.game.player = new Player(
+    const player = new Player(
       payload.id,
       payload.name,
       new Vector(payload.position.x, payload.position.y),
       payload.direction,
     )
-    this.game.addPlayer(this.game.player)
+
+    this.game.player = player.id
+    this.game.addPlayer(player)
   }
 
   send (event: ServerSendEventInterface): void {
@@ -97,7 +121,7 @@ export class Server implements ServerInterface {
       return
     }
 
-    ws.emit(event.key, typeof event.payload === 'string' ? event.payload : JSON.stringify(event.payload))
+    ws.emit(event.key, event.payload)
   }
 
   get isOk (): boolean {

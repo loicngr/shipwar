@@ -48,6 +48,11 @@ export class Player implements PlayerInterface {
       return false
     }
 
+    if (typeof gameInstance.prepareBullet !== 'undefined') {
+      gameInstance.prepareBullet.stop()
+      gameInstance.prepareBullet = undefined
+    }
+
     const speed = 200
     const nextXDirection = x * speed * delta
     const nextYDirection = y * speed * delta
